@@ -6,27 +6,30 @@ public class SynchronizedDemoOne {
 
     /**
      * synchronized 修饰静态方法
+     *
      * @return
      */
-    public static synchronized Integer getAgeOne(){
+    public static synchronized Integer getAgeOne() {
         return age;
     }
 
 
     /**
      * synchronized 修饰非静态方法
+     *
      * @return
      */
-    public synchronized Integer getAgeTwo(){
+    public synchronized Integer getAgeTwo() {
         return age;
     }
 
     /**
      * synchronized 修饰代码块
+     *
      * @return
      */
-    public   Integer getAgeThree(){
-        synchronized(this){
+    public Integer getAgeThree() {
+        synchronized (this) {
             return age;
         }
     }

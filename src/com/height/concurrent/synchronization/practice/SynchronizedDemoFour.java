@@ -6,7 +6,7 @@ package com.height.concurrent.synchronization.practice;
 public class SynchronizedDemoFour {
 
 
-    public void firstSynchronizedMethod() {
+    private void firstSynchronizedMethod() {
         synchronized (this) {
             System.out.println("first synchronized start !");
             sleep(1000);
@@ -14,14 +14,13 @@ public class SynchronizedDemoFour {
         }
     }
 
-    public void secondSynchronizedMethod() {
+    private void secondSynchronizedMethod() {
         synchronized (this) {
             System.out.println("second synchronized start !");
             sleep(1000);
             System.out.println("second synchronized  end ！");
         }
     }
-
 
     public static void main(String args[]) {
         synchronizedRun();

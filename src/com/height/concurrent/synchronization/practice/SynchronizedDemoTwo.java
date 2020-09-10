@@ -6,25 +6,25 @@ package com.height.concurrent.synchronization.practice;
 public class SynchronizedDemoTwo {
 
 
-    public static void firstMethod() {
+    private static void firstMethod() {
         System.out.println("first  start !");
         sleep(1000);
         System.out.println("first  end ！");
     }
 
-    public static void secondMethod() {
+    private static void secondMethod() {
         System.out.println("second  start !");
         sleep(1000);
         System.out.println("second   end ！");
     }
 
-    public synchronized static void firstSynchronizedMethod() {
+    private synchronized static void firstSynchronizedMethod() {
         System.out.println("first synchronized start !");
         sleep(1000);
         System.out.println("first synchronized end ！");
     }
 
-    public synchronized static void secondSynchronizedMethod() {
+    private synchronized static void secondSynchronizedMethod() {
         System.out.println("second synchronized start !");
         sleep(1000);
         System.out.println("second synchronized  end ！");

@@ -6,13 +6,13 @@ package com.height.concurrent.synchronization.practice;
 public class SynchronizedDemoThree {
 
 
-    public synchronized void firstSynchronizedMethod() {
+    private synchronized void firstSynchronizedMethod() {
         System.out.println("first synchronized start !");
         sleep(1000);
         System.out.println("first synchronized end ！");
     }
 
-    public synchronized void secondSynchronizedMethod() {
+    private synchronized void secondSynchronizedMethod() {
         System.out.println("second synchronized start !");
         sleep(1000);
         System.out.println("second synchronized  end ！");

@@ -96,37 +96,9 @@
      Constant pool:
         #1 = Methodref          #5.#26         // java/lang/Object."<init>":()V
         #2 = Fieldref           #4.#27         // com/height/concurrent/synchronization/implementation/SynchronizedDemoOne.age:I
-        #3 = Methodref          #28.#29        // java/lang/Integer.valueOf:(I)Ljava/lang/Integer;
-        #4 = Class              #30            // com/height/concurrent/synchronization/implementation/SynchronizedDemoOne
-        #5 = Class              #31            // java/lang/Object
-        #6 = Utf8               age
-        #7 = Utf8               I
-        #8 = Utf8               <init>
-        #9 = Utf8               ()V
-       #10 = Utf8               Code
-       #11 = Utf8               LineNumberTable
-       #12 = Utf8               LocalVariableTable
-       #13 = Utf8               this
-       #14 = Utf8               Lcom/height/concurrent/synchronization/implementation/SynchronizedDemoOne;
-       #15 = Utf8               getAgeOne
-       #16 = Utf8               ()Ljava/lang/Integer;
-       #17 = Utf8               getAgeTwo
-       #18 = Utf8               getAgeThree
-       #19 = Utf8               StackMapTable
-       #20 = Class              #30            // com/height/concurrent/synchronization/implementation/SynchronizedDemoOne
-       #21 = Class              #31            // java/lang/Object
-       #22 = Class              #32            // java/lang/Throwable
-       #23 = Utf8               <clinit>
-       #24 = Utf8               SourceFile
-       #25 = Utf8               SynchronizedDemoOne.java
-       #26 = NameAndType        #8:#9          // "<init>":()V
-       #27 = NameAndType        #6:#7          // age:I
-       #28 = Class              #33            // java/lang/Integer
-       #29 = NameAndType        #34:#35        // valueOf:(I)Ljava/lang/Integer;
-       #30 = Utf8               com/height/concurrent/synchronization/implementation/SynchronizedDemoOne
-       #31 = Utf8               java/lang/Object
-       #32 = Utf8               java/lang/Throwable
-       #33 = Utf8               java/lang/Integer
+        .                                      //中间省略部分
+        .
+        .
        #34 = Utf8               valueOf
        #35 = Utf8               (I)Ljava/lang/Integer;
      {
@@ -136,7 +108,7 @@
          Code:
            stack=1, locals=1, args_size=1
               0: aload_0
-              1: invokespecial #1                  // Method java/lang/Object."<init>":()V
+              1: invokespecial #1                  
               4: return
            LineNumberTable:
              line 3: 0
@@ -146,22 +118,22 @@
      
        public static synchronized java.lang.Integer getAgeOne();
          descriptor: ()Ljava/lang/Integer;
-         flags: ACC_PUBLIC, ACC_STATIC, ACC_SYNCHRONIZED
+         flags: ACC_PUBLIC, ACC_STATIC, ACC_SYNCHRONIZED   // ACC_SYNCHRONIZED 标志位
          Code:
            stack=1, locals=0, args_size=0
-              0: getstatic     #2                  // Field age:I
-              3: invokestatic  #3                  // Method java/lang/Integer.valueOf:(I)Ljava/lang/Integer;
+              0: getstatic     #2                  
+              3: invokestatic  #3                  
               6: areturn
            LineNumberTable:
              line 8: 0
      
        public synchronized java.lang.Integer getAgeTwo();
          descriptor: ()Ljava/lang/Integer;
-         flags: ACC_PUBLIC, ACC_SYNCHRONIZED
+         flags: ACC_PUBLIC, ACC_SYNCHRONIZED             // ACC_SYNCHRONIZED 标志位
          Code:
            stack=1, locals=1, args_size=1
-              0: getstatic     #2                  // Field age:I
-              3: invokestatic  #3                  // Method java/lang/Integer.valueOf:(I)Ljava/lang/Integer;
+              0: getstatic     #2                  
+              3: invokestatic  #3                  
               6: areturn
            LineNumberTable:
              line 12: 0
@@ -177,15 +149,15 @@
               0: aload_0
               1: dup
               2: astore_1
-              3: monitorenter
-              4: getstatic     #2                  // Field age:I
-              7: invokestatic  #3                  // Method java/lang/Integer.valueOf:(I)Ljava/lang/Integer;
+              3: monitorenter                    //获取monitor对象
+              4: getstatic     #2                  
+              7: invokestatic  #3                  
              10: aload_1
-             11: monitorexit
+             11: monitorexit                     //释放monitor对象
              12: areturn
              13: astore_2
              14: aload_1
-             15: monitorexit
+             15: monitorexit                     //锁定过程中发生异常时的释放monitor对象
              16: aload_2
              17: athrow
            Exception table:
@@ -204,17 +176,10 @@
                offset_delta = 13
                locals = [ class com/height/concurrent/synchronization/implementation/SynchronizedDemoOne, class java/lang/Object ]
                stack = [ class java/lang/Throwable ]
-     
-       static {};
-         descriptor: ()V
-         flags: ACC_STATIC
-         Code:
-           stack=1, locals=0, args_size=0
-              0: iconst_1
-              1: putstatic     #2                  // Field age:I
-              4: return
-           LineNumberTable:
-             line 5: 0
+            .
+            .                                  //省略部分
+            .
+      
      }
      SourceFile: "SynchronizedDemoOne.java"
 

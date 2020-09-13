@@ -3,8 +3,8 @@
   最近在读Charlie Hunt大神的《Java Performance》，第三章讲《JVM Overview》中间有说到synchronized的一些基本逻辑。本文会做一些整理，主要内容和重要知识点(本文中若未明确说明，JVM默认指的是HotSpot版VM)：
 *  synchronized是什么    
 *  synchronized在JVM中的实现原理
-    * **同步代码块**：通过**monitorenter**和**monitorexit**命令来实现
     * **同步方法**：通过**ACC_SYNCHRONIZED**标志位来实现
+    * **同步代码块**：通过**monitorenter**和**monitorexit**命令来实现
 ###### 注：在JVM中，其实ACC_SYNCHRONIZED标志也是通过monitor对象来实现的，不会在汇编层面实现有些区别。 
 *  synchronized使用demo和注意点
     * **类对象锁**：修饰静态方法和class对象时
@@ -24,27 +24,27 @@
   在Java中，是通过线程来实现并发。
 ### 2.synchronized有哪些常见用法
 * 修饰方法
-  ```
+  ```java
    public static synchronized Integer getAgeOne() {
           return age;
       }
    public synchronized Integer getAgeTwo() {
         return age;
     }
-   
-* 修饰代码块
   ```
+* 修饰代码块
+  ```java
     public Integer getAgeThree() {
         synchronized (this) {
             return age;
         }
     }
-
+  ```
  ### 3.synchronized在HotSpot VM中的实现原理
  * 方法：通过javap命令反解析class文件，获取对应class的代码区、本地变量表等等。今天我们主要用它来看下JVM最终把synchronized转化成了什么。
  * 步骤
     * 创建一个demo类
-    ```
+    ```java
     package com.height.concurrent.synchronization.implementation;
     
     public class SynchronizedDemoOne {
@@ -73,7 +73,6 @@
             }
         }
     }
-
     ```
     * 通过classc命令把java编译成class文件
     ```
@@ -84,7 +83,7 @@
         javap  -verbose  SynchronizedDemoOne
     ```
     * 得到反解析后的文件
-    ```
+    ```java
      Classfile /Users/height/git/learn/JavaAccumulator/src/com/height/concurrent/synchronization/implementation/SynchronizedDemoOne.class
        Last modified 2020-9-9; size 877 bytes
        MD5 checksum bdd02e83e30f0ac316a408694f638868
@@ -94,8 +93,8 @@
        major version: 52
        flags: ACC_PUBLIC, ACC_SUPER
      Constant pool:
-        #1 = Methodref          #5.#26         // java/lang/Object."<init>":()V
-        #2 = Fieldref           #4.#27         // com/height/concurrent/synchronization/implementation/SynchronizedDemoOne.age:I
+        #1 = Methodref          #5.#26         
+        #2 = Fieldref           #4.#27         
         .                                      //中间省略部分
         .
         .
@@ -149,15 +148,15 @@
               0: aload_0
               1: dup
               2: astore_1
-              3: monitorenter                    //获取monitor对象
+              3: monitorenter                             //获取monitor对象
               4: getstatic     #2                  
               7: invokestatic  #3                  
              10: aload_1
-             11: monitorexit                     //释放monitor对象
+             11: monitorexit                              //释放monitor对象
              12: areturn
              13: astore_2
              14: aload_1
-             15: monitorexit                     //锁定过程中发生异常时的释放monitor对象
+             15: monitorexit                              //锁定过程中发生异常时的释放monitor对象
              16: aload_2
              17: athrow
            Exception table:
@@ -179,8 +178,10 @@
             .
             .                                  //省略部分
             .
-      
      }
-     SourceFile: "SynchronizedDemoOne.java"
-
     ```
+   ###### 完整的文件参见： [反解析完整文件](https://github.com/height1987/JavaAccumulator/blob/master/src/com/height/concurrent/synchronization/SynchronizedSummay.md)
+   * 分析：
+    * 2个被synchronized修饰的方法，有一个特殊的标志位：ACC_SYNCHRONIZED。
+    * 被synchronized修饰的代码块中，有2个特殊的逻辑：monitorenter，monitorexit。
+    * 

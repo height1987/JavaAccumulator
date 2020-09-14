@@ -175,7 +175,7 @@
             .
      }
     ```
-   ###### 完整的文件参见： [反解析完整文件](https://github.com/height1987/JavaAccumulator/blob/master/src/com/height/concurrent/synchronization/SynchronizedSummay.md)
+   ###### 完整的文件参见： [反解析完整文件](https://github.com/height1987/JavaAccumulator/blob/master/src/com/height/concurrent/synchronization/implementation/SynchronizedDemoOne_code.txt)
    * 分析
      * 2个被synchronized修饰的方法，有一个特殊的标志位：ACC_SYNCHRONIZED。
      * 被synchronized修饰的代码块中，有2个特殊的逻辑：monitorenter,monitorexit。

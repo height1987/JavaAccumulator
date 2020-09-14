@@ -9,9 +9,9 @@
 *  synchronized使用demo和注意点
     * **类对象锁**：修饰静态方法和class对象时
     * **实例对象锁**：修饰非静态方法、代码块和非class对象时
-*  synchronized在源码中的使用和分析
+*  synchronized锁优化和锁升级过程
 
-### 1.synchronized是什么？
+### 1. synchronized是什么？
   《Java performance》中的定义是：
   ```
     Synchronization is described as a mechanism that prevents, avoids, 
@@ -22,7 +22,7 @@
     同步是一种并发操作机制，用来预防、避免对资源不合适的交替使用（通常竞争），保障交替使用资源的安全。
   ```
   在Java中，是通过线程来实现并发。
-### 2.synchronized有哪些常见用法
+### 2. synchronized有哪些常见用法
 * 修饰方法
   ```java
    public static synchronized Integer getAgeOne() {
@@ -40,32 +40,27 @@
         }
     }
   ```
- ### 3.synchronized在HotSpot VM中的实现原理
+ ### 3. synchronized在HotSpot VM中的实现原理
  * 方法：通过javap命令反解析class文件，获取对应class的代码区、本地变量表等等。今天我们主要用它来看下JVM最终把synchronized转化成了什么。
  * 步骤
     * 创建一个demo类
     ```java
-    package com.height.concurrent.synchronization.implementation;
-    
     public class SynchronizedDemoOne {
         private static int age = 1;
         /**
          * synchronized 修饰静态方法
-         * @return
          */
         public static synchronized Integer getAgeOne() {
             return age;
         }
         /**
          * synchronized 修饰非静态方法
-         * @return
          */
         public synchronized Integer getAgeTwo() {
             return age;
         }
         /**
          * synchronized 修饰代码块
-         * @return
          */
         public Integer getAgeThree() {
             synchronized (this) {
@@ -181,7 +176,152 @@
      }
     ```
    ###### 完整的文件参见： [反解析完整文件](https://github.com/height1987/JavaAccumulator/blob/master/src/com/height/concurrent/synchronization/SynchronizedSummay.md)
-   * 分析：
-    * 2个被synchronized修饰的方法，有一个特殊的标志位：ACC_SYNCHRONIZED。
-    * 被synchronized修饰的代码块中，有2个特殊的逻辑：monitorenter，monitorexit。
-    * 
+   * 分析
+     * 2个被synchronized修饰的方法，有一个特殊的标志位：ACC_SYNCHRONIZED。
+     * 被synchronized修饰的代码块中，有2个特殊的逻辑：monitorenter,monitorexit。
+     * 对象锁+对象头分析 //TODO 
+   
+   
+   ### 4. synchronized使用demo和注意点
+   ##### 4.1 案例1 
+   * 代码
+   ```java
+   public class SynchronizedDemoTwo {
+       public synchronized static void synchronizedStaticMethodMethod() {
+           System.out.println("synchronized static method start !");
+           sleep(1000);
+           System.out.println("synchronized static method  end ！");
+       }
+       public static void synchronizedClassMethod() {
+           synchronized (SynchronizedDemoTwo.class) {
+               System.out.println("synchronized class start !");
+               sleep(1000);
+               System.out.println("synchronized class end ！");
+           }
+       }
+       public static void main(String args[]) {
+           synchronizedRun();
+       }
+       private static void synchronizedRun() {
+           new Thread(new Runnable() {
+               @Override
+               public void run() {
+                   SynchronizedDemoTwo.synchronizedStaticMethodMethod();
+               }
+           }).start();
+           new Thread(new Runnable() {
+               @Override
+               public void run() {
+                   SynchronizedDemoTwo.synchronizedClassMethod();
+               }
+           }).start();
+       }
+       private static void sleep(int second) {
+           try {
+               Thread.sleep(second);
+           } catch (InterruptedException e) {
+               e.printStackTrace();
+           }
+       }
+   }
+   ```
+   * 执行结果
+   ```
+   synchronized static method start !
+   synchronized static method  end ！
+   synchronized class start !
+   synchronized class end ！
+   ```
+   * 分析
+     * 静态方法和同步参数是class对象时，执行时会获取class对象的锁，所以上述代码会发生锁竞争，执行结果也证实了这个逻辑。
+   * 注意点
+     * 当你使用synchronized修饰静态方法或者class对象时，要非常谨慎，同一个class只有一把锁，这个锁作用域是非常大的。像String.class,Integer.class这些原生类也不要轻易加锁。
+     
+   ##### 案例2
+   * 代码
+   ```java
+   public class SynchronizedDemoThree {
+       public synchronized void firstSynchronizedMethod() {
+           System.out.println("first synchronized start !");
+           sleep(1000);
+           System.out.println("first synchronized end ！");
+       }
+       public synchronized void secondSynchronizedMethod() {
+           System.out.println("second synchronized start !");
+           sleep(1000);
+           System.out.println("second synchronized  end ！");
+       }
+       public void synchronizedBlockMethod() {
+           synchronized (this) {
+               System.out.println("synchronized block start !");
+               sleep(1000);
+               System.out.println("synchronized block end ！");
+           }
+       }
+       public static void main(String args[]) {
+           SynchronizedDemoThree demo1 = new SynchronizedDemoThree();
+           new Thread(new Runnable() {
+               @Override
+               public void run() {
+                   demo1.firstSynchronizedMethod();
+               }
+           }).start();
+           new Thread(new Runnable() {
+               @Override
+               public void run() {
+                   demo1.secondSynchronizedMethod();
+               }
+           }).start();
+           new Thread(new Runnable() {
+               @Override
+               public void run() {
+                   demo1.synchronizedBlockMethod();
+               }
+           }).start();
+       }
+       private static void sleep(int second) {
+           try {
+               Thread.sleep(second);
+           } catch (InterruptedException e) {
+               e.printStackTrace();
+           }
+       }
+   }
+   ```
+   * 执行结果
+      ```
+      first synchronized start !
+      first synchronized end ！
+      synchronized block start !
+      synchronized block end ！
+      second synchronized start !
+      second synchronized  end ！
+      ```
+      * 分析
+        * 实例方法和代码块被synchronized修饰时，执行时会获取实例对象的锁，所以上述代码会发生锁竞争，执行结果也证实了这个逻辑。
+      * 注意点
+        * 尽量不要用一些公用对象的锁，比如封装类常量池中的一些对象： Integer,String等都有类似的逻辑。
+        
+### 5. synchronized锁优化逻辑和锁升级过程分析
+#### 5.1 锁的几种状态
+  由于开始设计的同步逻辑，在发生互斥资源竞争访问时，等待的线程会变成block状态。而线程的调度是在内核态运行的，所以涉及到了内核态和用户态的切换，而且是2次：block时一次，唤醒时一次。
+  所以这样的操作效率不高，JDK1.6开始，就对synchronized的机制做了优化，把锁的状态分成了以下几种：
+  * 无锁状态：以解锁
+  * 偏向锁：已锁定/已解锁且无共享
+  * 自旋锁(轻量级锁)：已锁定且共享，但非竞争。
+  * 膨胀锁(重量级锁)：已锁定/已解锁且共享和竞争。线程在monitor-enter或wait()时被阻塞。
+  
+#### 5.2 举个例子来说明这几种状态
+  * 银行交易有一个窗口可以办业务，门口有个取票机和一个引导员（帮助不会操作的客户）。
+  * 为了每次只有1个客户到窗口办业务，办业务前客户必须取票，然后系统会根据取票顺序按一定逻辑来叫号。
+  * 如果发现前面有人在窗口办业务，那么等待的客户必须到另外的等会区域去等待叫号，等候区域距离取票机和窗口都有一定的距离。
+  * 运行一段时间后，发现某些工作日，客户很少，但是就有那么几个中介的生意很好，有时候一天就某一个人，办几十次业务，每次都要取票，取完票后到等候区去等待叫号，然后一到等候区就被叫到号，然后再从等候区到窗口办理业务。
+  * 所以，银行为了在客户很少的时候，客户不需要取号了，只要窗口空着，第一个来办理业务的人，只要和引导员说一下，就可以进去办业务了。
+  * 因为引导员会记住你，如果中间没有其他客户需要办业务，你再过来的时候，也不用取号，直接进去办理业务。**（这时候变成了偏向锁）**
+  * 正在你享受这超级vip服务的时候，又来了个客户B也想办业务。他也比较聪明，知道取票等候区一套流程蛮麻烦，所以告诉引导员说，他在旁边等一等，等上个客户办完，他也想直接进去办业务。**（这时候变成了自旋锁）**
+  * 客户B发现自己在旁边等了很久，问了10次都没说搞定，所以他很火大，直接向银行大堂经理投诉。银行经理就过来说，今天你们不准不取号了，每次进去办业务必须取号。**（这时候变成了重锁）**
+  
+#### 5.3 分析
+  * 偏向锁适合的场景是，某段时间内访问互斥资源的线程基本是同一个
+  * 自旋锁适合的场景是，每次访问互斥资源的时间很短，大家能共享访问，互不影响
+  * 膨胀锁适合的场景是，常发生竞争，每次占用资源的时间都不短

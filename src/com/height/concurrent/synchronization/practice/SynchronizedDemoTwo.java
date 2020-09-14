@@ -4,32 +4,11 @@ package com.height.concurrent.synchronization.practice;
  * Synchronized 修饰静态方法
  */
 public class SynchronizedDemoTwo {
-
-
-    public static void firstMethod() {
-        System.out.println("first  start !");
+    public synchronized static void synchronizedStaticMethodMethod() {
+        System.out.println("synchronized static method start !");
         sleep(1000);
-        System.out.println("first  end ！");
+        System.out.println("synchronized static method  end ！");
     }
-
-    public static void secondMethod() {
-        System.out.println("second  start !");
-        sleep(1000);
-        System.out.println("second   end ！");
-    }
-
-    public synchronized static void firstSynchronizedMethod() {
-        System.out.println("first synchronized start !");
-        sleep(1000);
-        System.out.println("first synchronized end ！");
-    }
-
-    public synchronized static void secondSynchronizedMethod() {
-        System.out.println("second synchronized start !");
-        sleep(1000);
-        System.out.println("second synchronized  end ！");
-    }
-
     public static void synchronizedClassMethod() {
         synchronized (SynchronizedDemoTwo.class) {
             System.out.println("synchronized class start !");
@@ -37,41 +16,14 @@ public class SynchronizedDemoTwo {
             System.out.println("synchronized class end ！");
         }
     }
-
-
     public static void main(String args[]) {
-        simpleRun();
-        sleep(3000);
-        System.out.println("————————————————————————");
         synchronizedRun();
     }
-
-    private static void simpleRun() {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                SynchronizedDemoTwo.firstMethod();
-            }
-        }).start();
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                SynchronizedDemoTwo.secondMethod();
-            }
-        }).start();
-    }
-
     private static void synchronizedRun() {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                SynchronizedDemoTwo.firstSynchronizedMethod();
-            }
-        }).start();
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                SynchronizedDemoTwo.secondSynchronizedMethod();
+                SynchronizedDemoTwo.synchronizedStaticMethodMethod();
             }
         }).start();
         new Thread(new Runnable() {
@@ -81,7 +33,6 @@ public class SynchronizedDemoTwo {
             }
         }).start();
     }
-
     private static void sleep(int second) {
         try {
             Thread.sleep(second);

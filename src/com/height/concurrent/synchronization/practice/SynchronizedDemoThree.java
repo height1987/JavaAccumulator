@@ -1,32 +1,28 @@
 package com.height.concurrent.synchronization.practice;
 
 /**
- * Synchronized 修饰非静态方法
+ * Synchronized 修饰非静态方法和代码块
  */
 public class SynchronizedDemoThree {
-
-
-    private synchronized void firstSynchronizedMethod() {
+    public synchronized void firstSynchronizedMethod() {
         System.out.println("first synchronized start !");
         sleep(1000);
         System.out.println("first synchronized end ！");
     }
-
-    private synchronized void secondSynchronizedMethod() {
+    public synchronized void secondSynchronizedMethod() {
         System.out.println("second synchronized start !");
         sleep(1000);
         System.out.println("second synchronized  end ！");
     }
-
-
-    public static void main(String args[]) {
-        synchronizedRun();
+    public void synchronizedBlockMethod() {
+        synchronized (this) {
+            System.out.println("synchronized block start !");
+            sleep(1000);
+            System.out.println("synchronized block end ！");
+        }
     }
-
-    private static void synchronizedRun() {
-
+    public static void main(String args[]) {
         SynchronizedDemoThree demo1 = new SynchronizedDemoThree();
-
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -39,8 +35,13 @@ public class SynchronizedDemoThree {
                 demo1.secondSynchronizedMethod();
             }
         }).start();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                demo1.synchronizedBlockMethod();
+            }
+        }).start();
     }
-
     private static void sleep(int second) {
         try {
             Thread.sleep(second);

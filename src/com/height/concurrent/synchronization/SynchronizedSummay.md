@@ -1,15 +1,20 @@
  ## Java中synchronized的使用和底层原理解读
  
   最近在读Charlie Hunt大神的《Java Performance》，第三章讲《JVM Overview》中间有说到synchronized的一些基本逻辑。本文会做一些整理，主要内容和重要知识点(本文中若未明确说明，JVM默认指的是HotSpot版VM)：
-*  synchronized是什么    
-*  synchronized在JVM中的实现原理
+1.  synchronized是什么 
+2.  synchronized有哪些常见用法   
+3.  synchronized在JVM中的实现原理
     * **同步方法**：通过**ACC_SYNCHRONIZED**标志位来实现
     * **同步代码块**：通过**monitorenter**和**monitorexit**命令来实现
-###### 注：在JVM中，其实ACC_SYNCHRONIZED标志也是通过monitor对象来实现的，不会在汇编层面实现有些区别。 
-*  synchronized使用demo和注意点
+###### 注：在JVM中，其实ACC_SYNCHRONIZED标志也是通过获取monitor对象来实现的。 
+4. synchronized使用demo和注意点
     * **类对象锁**：修饰静态方法和class对象时
     * **实例对象锁**：修饰非静态方法、代码块和非class对象时
-*  synchronized锁优化和锁升级过程
+5.  synchronized锁优化和锁升级过程
+    * 无锁
+    * 偏向锁
+    * 轻量级锁
+    * 重量级锁
 
 ### 1. synchronized是什么？
   《Java performance》中的定义是：
@@ -21,14 +26,13 @@
   ```
     同步是一种并发操作机制，用来预防、避免对资源不合适的交替使用（通常竞争），保障交替使用资源的安全。
   ```
-  在Java中，是通过线程来实现并发。
 ### 2. synchronized有哪些常见用法
 * 修饰方法
   ```java
-   public static synchronized Integer getAgeOne() {
+   public static synchronized Integer getAgeOne() { //静态方法
           return age;
       }
-   public synchronized Integer getAgeTwo() {
+   public synchronized Integer getAgeTwo() { //实例方法
         return age;
     }
   ```
@@ -41,7 +45,8 @@
     }
   ```
  ### 3. synchronized在HotSpot VM中的实现原理
- * 方法：通过javap命令反解析class文件，获取对应class的代码区、本地变量表等等。今天我们主要用它来看下JVM最终把synchronized转化成了什么。
+ * 方法
+   * 通过**javap**命令反解析class文件，获取synchronized在字节码层面是如何实现的。
  * 步骤
     * 创建一个demo类
     ```java
@@ -179,7 +184,7 @@
    * 分析
      * 2个被synchronized修饰的方法，有一个特殊的标志位：ACC_SYNCHRONIZED。
      * 被synchronized修饰的代码块中，有2个特殊的逻辑：monitorenter,monitorexit。
-     * 对象锁+对象头分析 //TODO 
+     
    
    
    ### 4. synchronized使用demo和注意点
@@ -187,12 +192,12 @@
    * 代码
    ```java
    public class SynchronizedDemoTwo {
-       public synchronized static void synchronizedStaticMethodMethod() {
+       public synchronized static void synchronizedStaticMethodMethod() {  //同步静态方法
            System.out.println("synchronized static method start !");
            sleep(1000);
            System.out.println("synchronized static method  end ！");
        }
-       public static void synchronizedClassMethod() {
+       public static void synchronizedClassMethod() {                     //同步代码块-同步对象为class对象
            synchronized (SynchronizedDemoTwo.class) {
                System.out.println("synchronized class start !");
                sleep(1000);
@@ -227,9 +232,9 @@
    ```
    * 执行结果
    ```
-   synchronized static method start !
+   synchronized static method start !          
    synchronized static method  end ！
-   synchronized class start !
+   synchronized class start !               //在静态同步方法执行结束后才开始执行同步代码块
    synchronized class end ！
    ```
    * 分析
@@ -237,21 +242,21 @@
    * 注意点
      * 当你使用synchronized修饰静态方法或者class对象时，要非常谨慎，同一个class只有一把锁，这个锁作用域是非常大的。像String.class,Integer.class这些原生类也不要轻易加锁。
      
-   ##### 案例2
+   ##### 4.2 案例2
    * 代码
    ```java
    public class SynchronizedDemoThree {
-       public synchronized void firstSynchronizedMethod() {
+       public synchronized void firstSynchronizedMethod() {    //同步方法1
            System.out.println("first synchronized start !");
            sleep(1000);
            System.out.println("first synchronized end ！");
        }
-       public synchronized void secondSynchronizedMethod() {
+       public synchronized void secondSynchronizedMethod() {   //同步方法2
            System.out.println("second synchronized start !");
            sleep(1000);
            System.out.println("second synchronized  end ！");
        }
-       public void synchronizedBlockMethod() {
+       public void synchronizedBlockMethod() {                //同步代码块-同步对象为实例对象
            synchronized (this) {
                System.out.println("synchronized block start !");
                sleep(1000);
@@ -292,10 +297,10 @@
       ```
       first synchronized start !
       first synchronized end ！
-      synchronized block start !
+      synchronized block start !          
       synchronized block end ！
       second synchronized start !
-      second synchronized  end ！
+      second synchronized  end ！            //有序执行这3个方法，说明发生了竞争
       ```
       * 分析
         * 实例方法和代码块被synchronized修饰时，执行时会获取实例对象的锁，所以上述代码会发生锁竞争，执行结果也证实了这个逻辑。
@@ -306,22 +311,29 @@
 #### 5.1 锁的几种状态
   由于开始设计的同步逻辑，在发生互斥资源竞争访问时，等待的线程会变成block状态。而线程的调度是在内核态运行的，所以涉及到了内核态和用户态的切换，而且是2次：block时一次，唤醒时一次。
   所以这样的操作效率不高，JDK1.6开始，就对synchronized的机制做了优化，把锁的状态分成了以下几种：
-  * 无锁状态：以解锁
+  * 无锁状态：已解锁
   * 偏向锁：已锁定/已解锁且无共享
-  * 自旋锁(轻量级锁)：已锁定且共享，但非竞争。
-  * 膨胀锁(重量级锁)：已锁定/已解锁且共享和竞争。线程在monitor-enter或wait()时被阻塞。
+  * 轻量级锁：已锁定且共享，但非竞争。
+  * 重量级锁：已锁定/已解锁且共享和竞争。线程在monitor-enter或wait()时被阻塞。
   
 #### 5.2 举个例子来说明这几种状态
   * 银行交易有一个窗口可以办业务，门口有个取票机和一个引导员（帮助不会操作的客户）。
   * 为了每次只有1个客户到窗口办业务，办业务前客户必须取票，然后系统会根据取票顺序按一定逻辑来叫号。
-  * 如果发现前面有人在窗口办业务，那么等待的客户必须到另外的等会区域去等待叫号，等候区域距离取票机和窗口都有一定的距离。
-  * 运行一段时间后，发现某些工作日，客户很少，但是就有那么几个中介的生意很好，有时候一天就某一个人，办几十次业务，每次都要取票，取完票后到等候区去等待叫号，然后一到等候区就被叫到号，然后再从等候区到窗口办理业务。
-  * 所以，银行为了在客户很少的时候，客户不需要取号了，只要窗口空着，第一个来办理业务的人，只要和引导员说一下，就可以进去办业务了。
-  * 因为引导员会记住你，如果中间没有其他客户需要办业务，你再过来的时候，也不用取号，直接进去办理业务。**（这时候变成了偏向锁）**
-  * 正在你享受这超级vip服务的时候，又来了个客户B也想办业务。他也比较聪明，知道取票等候区一套流程蛮麻烦，所以告诉引导员说，他在旁边等一等，等上个客户办完，他也想直接进去办业务。**（这时候变成了自旋锁）**
-  * 客户B发现自己在旁边等了很久，问了10次都没说搞定，所以他很火大，直接向银行大堂经理投诉。银行经理就过来说，今天你们不准不取号了，每次进去办业务必须取号。**（这时候变成了重锁）**
+  * 如果发现前面有人在窗口办业务，那么等待的客户必须到另外的等会区域去等待叫号，等候区域距离取票机和窗口都有一定的距离。**（系统调度效率不高）**
+  * 运行一段时间后，发现有时候客户很少，还是需要取号，然后到等候区等待叫号，感觉可以优化。
   
-#### 5.3 分析
-  * 偏向锁适合的场景是，某段时间内访问互斥资源的线程基本是同一个
-  * 自旋锁适合的场景是，每次访问互斥资源的时间很短，大家能共享访问，互不影响
-  * 膨胀锁适合的场景是，常发生竞争，每次占用资源的时间都不短
+  优化后：
+  * 银行为了在客户很少的时候，如果窗口空着，第一个来办理业务的人，引导员会记录你的名字，不用取票，直接办业务，而且只要没有新客户，你多次办业务也不需要取票。**（这时候变成了偏向锁）**
+  * 正在你享受这超级vip服务的时候，有来了新的客户要办业务，他也知道银行的新规定，没有直接取号，而是询问引导员是否可办业务，引导员说现在有人。**（这时候变成了轻量级锁，通过cas判断是否能获取锁）**
+  * 新客户知道取票等候区一套流程蛮麻烦，所以告诉引导员说，他可以旁边等一等，前面人办完了，他也想直接进去办业务。**（这时候变成了自旋锁）**
+  * 新客户发现自己询问了10次都没等到办业务，所以直接向银行大堂经理投诉。银行经理就过来说，今天你们不准不取号了，每次进去办业务必须取号。**（这时候变成了重锁）**
+  
+  分析：
+   * 偏向锁适合的场景是，某段时间内访问互斥资源的线程基本是同一个，没有共享访问的场景
+   * 自旋锁适合的场景是，每次访问互斥资源的时间很短，大家能共享访问，互不影响
+   * 膨胀锁适合的场景是，常发生竞争，每次占用资源的时间都不短
+
+#### 5.3锁升级简化版
+   
+  
+  

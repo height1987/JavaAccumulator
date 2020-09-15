@@ -294,14 +294,14 @@
    }
    ```
    * 执行结果
-      ```
-      first synchronized start !
-      first synchronized end ！
-      synchronized block start !          
-      synchronized block end ！
-      second synchronized start !
-      second synchronized  end ！            //有序执行这3个方法，说明发生了竞争
-      ```
+    ```
+    first synchronized start !
+    first synchronized end ！
+    synchronized block start !          
+    synchronized block end ！
+    second synchronized start !
+    second synchronized  end ！            //有序执行这3个方法，说明发生了竞争
+    ```
       * 分析
         * 实例方法和代码块被synchronized修饰时，执行时会获取实例对象的锁，所以上述代码会发生锁竞争，执行结果也证实了这个逻辑。
       * 注意点

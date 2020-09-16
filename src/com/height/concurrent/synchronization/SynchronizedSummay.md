@@ -6,7 +6,7 @@
 3.  synchronized在JVM中的实现原理
     * **同步方法**：通过**ACC_SYNCHRONIZED**标志位来实现
     * **同步代码块**：通过**monitorenter**和**monitorexit**命令来实现
-###### 注：在JVM中，其实ACC_SYNCHRONIZED标志也是通过获取monitor对象来实现的。 
+ 
 4. synchronized使用demo和注意点
     * **类对象锁**：修饰静态方法和class对象时
     * **实例对象锁**：修饰非静态方法、代码块和非class对象时
@@ -181,10 +181,29 @@
      }
     ```
    ###### 完整的文件参见： [反解析完整文件](https://github.com/height1987/JavaAccumulator/blob/master/src/com/height/concurrent/synchronization/implementation/SynchronizedDemoOne_code.txt)
-   * 分析
-     * 2个被synchronized修饰的方法，有一个特殊的标志位：ACC_SYNCHRONIZED。
-     * 被synchronized修饰的代码块中，有2个特殊的逻辑：monitorenter,monitorexit。
-     
+   
+ * 分析 
+   * 官方对synchronized关键词的解释是这样的[synchronized官方解释](https://docs.oracle.com/javase/specs/jvms/se8/html/jvms-2.html#jvms-2.11.10)
+     ```
+        Method-level synchronization is performed implicitly, as part of method invocation and return. 
+        A synchronized method is distinguished in the run-time constant pool’s method_info structure by the ACC_SYNCHRONIZED flag,
+        which is checked by the method invocation instructions. When invoking a method for which ACC_SYNCHRONIZED is set, 
+        the executing thread enters a monitor, invokes the method itself, and exits the monitor whether the method invocation completes normally or abruptly. 
+        During the time the executing thread owns the monitor, no other thread may enter it. 
+        If an exception is thrown during invocation of the synchronized method and the synchronized method does not handle the exception, 
+        the monitor for the method is automatically exited before the exception is rethrown out of the synchronized method.
+     ```
+     翻译下
+     ```
+        同步方法的运行是隐式的，类似于jvm对于方法的引用和返回的支持。同步方法通过在运行常量池里method_info数据结构中的ACC_SYNCHRONIZED标签来标注。
+        如果一个线程发现调用的方法有ACC_SYNCHRONIZED标记，那么线程的执行过程就变成：获取monitor对象，调用方法，释放monitor对象。
+        在某个线程持有monitor对象时，如果其他线程也想获取该对象，则会别阻塞。
+        如果一个同步方法执行过程中发生异常，而且方法自己没有处理，那么在异常被向外抛时，线程也会自动释放monitor对象。
+        ```
+   **官方文档也说的非常清楚了，JVM其实在处理同步方法的时候，是隐式的通过monitor对象来实现。
+   从反解析的class中也可以看到，同步代码块是显式的通过monitor对象来实现互斥访问。
+   因此可以简单的归纳下，synchronized关键词的实现，在JVM中，主要通过获取monitor对象来实现的**
+
    
    
    ### 4. synchronized使用demo和注意点
@@ -336,9 +355,12 @@
 #### 5.3锁升级简化版
    * Mark Word介绍
      * JVM主要通过对象头中的Mark Word来标记锁的相关状态，包括当前锁的状态和持有锁对象的信息，下面是在不同状态下Mark Word的信息。
-     ![avatar](https://github.com/height1987/JavaAccumulator/blob/master/src/com/height/concurrent/synchronization/MarkWord.png)
+     ![mark word.png](https://upload-images.jianshu.io/upload_images/3088712-177f07c7ab0ab205.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
    * 锁升级流程简化版
      * 很多博客中有一个详细版的锁升级流程，我把他们简化了下，更容易理解一些
-     ![avatar](https://github.com/height1987/JavaAccumulator/blob/master/src/com/height/concurrent/synchronization/LockUpgrade.png)
+     ![锁升级.png](https://upload-images.jianshu.io/upload_images/3088712-5164002a4f9fbccf.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
   
   
+
+
+

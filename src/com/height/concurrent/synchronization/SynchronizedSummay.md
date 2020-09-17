@@ -355,10 +355,10 @@
 #### 5.3锁升级简化版
    * Mark Word介绍
      * JVM主要通过对象头中的Mark Word来标记锁的相关状态，包括当前锁的状态和持有锁对象的信息，下面是在不同状态下Mark Word的信息。
-     ![mark word.png](https://upload-images.jianshu.io/upload_images/3088712-177f07c7ab0ab205.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+     ![mark word.png](https://github.com/height1987/JavaAccumulator/blob/master/src/com/height/concurrent/synchronization/MarkWord.png?raw=true)
    * 锁升级流程简化版
      * 很多博客中有一个详细版的锁升级流程，我把他们简化了下，更容易理解一些
-     ![锁升级.png](https://upload-images.jianshu.io/upload_images/3088712-5164002a4f9fbccf.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+     ![锁升级.png](https://github.com/height1987/JavaAccumulator/blob/master/src/com/height/concurrent/synchronization/LockUpgrade.png?raw=true)
   
   
 

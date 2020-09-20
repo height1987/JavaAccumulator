@@ -358,7 +358,7 @@
      ![mark word.png](http://outter.oss-cn-shanghai.aliyuncs.com/MarkWord.png)
    * 锁升级流程简化版
      * 很多博客中有一个详细版的锁升级流程，我把他们简化了下，更容易理解一些
-     ![锁升级.png](http://outter.oss-cn-shanghai.aliyuncs.com/LockUpgrade.png)
+     ![锁升级.png](http://outter.oss-cn-shanghai.aliyuncs.com/LockUpgradeV2.png)
    * 注意点
      * 锁的状态只有4种，无锁->偏向锁->轻量级锁->重量级锁
      * 升级过程不可逆，不同阶段通过从轻到重的方式获取锁

@@ -65,7 +65,7 @@
             return age;
         }
         /**
-         * synchronized 修饰代码块
+         * synchronized 修饰代码块完整
          */
         public Integer getAgeThree() {
             synchronized (this) {
@@ -180,7 +180,7 @@
             .
      }
     ```
-   ###### 完整的文件参见： [反解析完整文件](https://github.com/height1987/JavaAccumulator/blob/master/src/com/height/concurrent/synchronization/implementation/SynchronizedDemoOne_code.txt)
+   ###### 的文件参见： [反解析完整文件](https://github.com/height1987/JavaAccumulator/blob/master/src/com/height/concurrent/synchronization/implementation/SynchronizedDemoOne_code.txt)
    
  * 分析 
    * 官方对synchronized关键词的解释是这样的[synchronized官方解释](https://docs.oracle.com/javase/specs/jvms/se8/html/jvms-2.html#jvms-2.11.10)
@@ -343,7 +343,7 @@
   
   优化后：
   * 在客户很少的时候，如果窗口空闲，则第一个来办理业务的人，引导员会只需记录他的名字，不用取票，直接让他去办业务，而且只要没有新客户，他多次办业务都不需要取票。**（这时候变成了偏向锁）**
-  * 正在他享受这超级vip服务的时候，有来了新的客户，新客户也知道银行的新规定，没有直接取号，而是询问引导员是否可办业务，引导员说不行，因为现在有人在办。**（这时候变成了轻量级锁，通过cas判断是否能获取锁）**
+  * 正在他享受这超级vip服务的时候，又来了新的客户，新客户也知道银行的新规定，没有直接取号，而是询问引导员是否可办业务，引导员说不行，因为现在有人在办。**（这时候变成了轻量级锁，通过cas判断是否能获取锁）**
   * 新客户知道取票等候区一套流程蛮麻烦，所以告诉引导员说，他可以旁边等一等，前面人办完了，他也想直接进去办业务。**（这时候变成了自旋锁）**
   * 新客户发现自己询问了10次都没等到办业务，所以直接向银行大堂经理投诉。银行经理就过来说，今天你们不准不取号了，每次进去办业务必须取号。**（这时候变成了重锁）**
   
@@ -366,7 +366,7 @@
      
   
 
-#### 本文中所有的代码和说明都可以在github中找到，[真相戳这里>](https://github.com/height1987/JavaAccumulator/tree/master/src/com/height/concurrent/synchronization)
+#### 本文中所有的代码和说明都可以在github中找到，[戳这里>](https://github.com/height1987/JavaAccumulator/tree/master/src/com/height/concurrent/synchronization)
 
 ----
 

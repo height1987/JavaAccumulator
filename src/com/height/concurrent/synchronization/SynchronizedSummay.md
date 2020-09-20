@@ -355,12 +355,23 @@
 #### 5.3锁升级简化版
    * Mark Word介绍
      * JVM主要通过对象头中的Mark Word来标记锁的相关状态，包括当前锁的状态和持有锁对象的信息，下面是在不同状态下Mark Word的信息。
-     ![mark word.png](https://github.com/height1987/JavaAccumulator/blob/master/src/com/height/concurrent/synchronization/MarkWord.png?raw=true)
+     ![mark word.png](http://outter.oss-cn-shanghai.aliyuncs.com/MarkWord.png)
    * 锁升级流程简化版
      * 很多博客中有一个详细版的锁升级流程，我把他们简化了下，更容易理解一些
-     ![锁升级.png](https://github.com/height1987/JavaAccumulator/blob/master/src/com/height/concurrent/synchronization/LockUpgrade.png?raw=true)
+     ![锁升级.png](http://outter.oss-cn-shanghai.aliyuncs.com/LockUpgrade.png)
+   * 注意点
+     * 锁的状态只有4种，无锁->偏向锁->轻量级锁->重量级锁
+     * 升级过程不可逆，不同阶段通过从轻到重的方式获取锁
+     * 自旋这个操作是通过线程死循环，而防止被阻塞，试图避免用户态和内核态的切换，所以本身不属于锁的状态，是配合轻量级锁使用的一种方式
+     
   
-  
 
+#### 本文中所有的代码和说明都可以在github中找到，[真相戳这里>](https://github.com/height1987/JavaAccumulatorhttps://github.com/height1987/JavaAccumulator/tree/master/src/com/height/concurrent/synchronization)
 
+----
 
+我是大旗，努力用易理解的案例分析进阶知识，一起来学习JVM调优，高并发，常用中间件吧~
+
+如果喜欢我的文章，请关注我吧~
+
+![二维码](http://outter.oss-cn-shanghai.aliyuncs.com/qrcode-daqi.jpg)

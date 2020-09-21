@@ -1,4 +1,4 @@
- ## Java中synchronized的使用和底层原理解读
+ ## synchronized底层原理、锁升级过程解读(带案例)
  
   最近在读Charlie Hunt大神的《Java Performance》，第三章讲《JVM Overview》中间有说到synchronized的一些基本逻辑。本文会做一些整理，主要内容和重要知识点(本文中若未明确说明，JVM默认指的是HotSpot版VM)：
 1.  synchronized是什么 
@@ -200,10 +200,10 @@
         在某个线程持有monitor对象时，如果其他线程也想获取该对象，则会别阻塞。
         如果一个同步方法执行过程中发生异常，而且方法自己没有处理，那么在异常被向外抛时，线程也会自动释放monitor对象。
         ```
-   **官方文档也说的非常清楚了，JVM其实在处理同步方法的时候，是隐式的通过monitor对象来实现。
-   从反解析的class中也可以看到，同步代码块是显式的通过monitor对象来实现互斥访问。
-   因此可以简单的归纳下，synchronized关键词的实现，在JVM中，主要通过获取monitor对象来实现的。**
-
+   
+   * 官方文档也说的非常清楚了，JVM在处理同步方法时，是通过隐式的获取monitor对象来实现。
+     从反解析的class中也可以看到，同步代码块是显式的通过monitor对象来实现互斥访问。
+      因此可以简单的归纳下，synchronized关键词的实现，**在JVM中，synchronized通过获取monitor对象来实现的。**
    
    
    ### 4. synchronized使用demo和注意点
@@ -253,8 +253,9 @@
    ```
    synchronized static method start !          
    synchronized static method  end ！
-   synchronized class start !               //在静态同步方法执行结束后才开始执行同步代码块
+   synchronized class start !               
    synchronized class end ！
+//在静态同步方法执行结束后才开始执行同步代码块
    ```
    * 分析
      * 静态方法和同步参数是class对象时，执行时会获取class对象的锁，所以上述代码会发生锁竞争，执行结果也证实了这个逻辑。

@@ -1,5 +1,7 @@
 package com.height.concurrent.synchronization.practice;
 
+import static com.height.common.ThreadUtils.sleep;
+
 /**
  * Synchronized 修饰代码块方法
  */
@@ -36,11 +38,5 @@ public class SynchronizedDemoFour {
             }
         }).start();
     }
-    private static void sleep(int second) {
-        try {
-            Thread.sleep(second);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-    }
+
 }

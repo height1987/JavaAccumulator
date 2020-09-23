@@ -1,5 +1,7 @@
 package com.height.concurrent.synchronization.practice;
 
+import static com.height.common.ThreadUtils.sleep;
+
 /**
  * Synchronized 修饰静态方法
  */
@@ -32,12 +34,5 @@ public class SynchronizedDemoTwo {
                 SynchronizedDemoTwo.synchronizedClassMethod();
             }
         }).start();
-    }
-    private static void sleep(int second) {
-        try {
-            Thread.sleep(second);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
     }
 }

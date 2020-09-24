@@ -7,12 +7,29 @@ public class VolatileDemoOne {
 
     public static void main(String args[]) {
 
+        methodOne();
+        methodTwo();
+        methodThree();
+
+    }
+    private static void methodOne() {
         ThreadDemo threadDemo = new ThreadDemo();
         threadDemo.start();
         while (threadDemo.isNormalFlag()){
-            int i = 0;
-            int iw = 0;
         }
-
+    }
+    private static void methodTwo() {
+        ThreadDemo threadDemo = new ThreadDemo();
+        threadDemo.start();
+        while (threadDemo.isNormalFlag()){
+            System.out.println("跳出循环!");
+        }
+    }
+    private static void methodThree() {
+        ThreadDemo threadDemo = new ThreadDemo();
+        threadDemo.start();
+        while (threadDemo.isNormalFlag()){
+            ThreadUtils.sleep(200);
+        }
     }
 }

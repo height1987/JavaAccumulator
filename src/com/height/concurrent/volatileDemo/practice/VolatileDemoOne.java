@@ -6,16 +6,23 @@ import com.height.common.ThreadUtils;
 public class VolatileDemoOne {
 
     public static void main(String args[]) {
-
-        methodOne();
-        methodTwo();
+//        methodOne1();
+//        methodTwo();
         methodThree();
-
     }
     private static void methodOne() {
         ThreadDemo threadDemo = new ThreadDemo();
         threadDemo.start();
         while (threadDemo.isNormalFlag()){
+        }
+    }
+    private static void methodOne1() {
+        ThreadDemo threadDemo = new ThreadDemo();
+        threadDemo.start();
+        while (true){
+            if(!threadDemo.isNormalFlag()){
+                System.out.println("sss");
+            }
         }
     }
     private static void methodTwo() {

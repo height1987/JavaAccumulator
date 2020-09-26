@@ -7,8 +7,11 @@ public class ThreadDemo extends Thread {
 
     @Override
     public void run() {
-        ThreadUtils.sleep(100);
+        ThreadUtils.sleep(1000);
         normalFlag = false;
+        while (true){
+
+        }
     }
     public boolean isNormalFlag() {
         return normalFlag;

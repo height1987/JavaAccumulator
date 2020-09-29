@@ -29,7 +29,7 @@ public class VolatileDemoOne {
     /**
      * 结论：可以正常结束运行
      * 因为flag在子线程中更新，同时System.out.print中有synchronized关键词，
-     * 在获得锁的时候，会把变量全部同步到主内存中。
+     * 在获得锁的时候，会把主内存中的变量重新copy到工作内存，然后释放锁时再把工作内存中的变量同步到主存中去
      * 这种情况下，只要在while循环中添加synchronized模块，也能达到相同的目的
      */
     private static void normalMethodTwo() {

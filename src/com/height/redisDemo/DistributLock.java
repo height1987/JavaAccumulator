@@ -1,6 +1,7 @@
 package com.height.redisDemo;
 
 import org.redisson.Redisson;
+import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 
 /**
@@ -13,6 +14,21 @@ import org.redisson.api.RedissonClient;
 public class DistributLock {
     public static void main(String args[]){
         RedissonClient redissonClient = Redisson.create();
-        redissonClient.getLock("12").lock();
+        RLock lock = redissonClient.getLock("12");
+        lock.lock();
+        doOneThing();
+        lock.lock();
+        doTwoThing();
+        lock.unlock();
+        lock.unlock();
+    }
+
+    private static void doTwoThing() {
+        System.out.println("do something");
+    }
+
+
+    private static void doOneThing() {
+        System.out.println("do something");
     }
 }

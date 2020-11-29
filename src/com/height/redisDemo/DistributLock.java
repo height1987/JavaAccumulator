@@ -24,11 +24,11 @@ public class DistributLock {
     }
 
     private static void doTwoThing() {
-        System.out.println("do something");
+        System.out.println("do oneThing");
     }
 
 
     private static void doOneThing() {
-        System.out.println("do something");
+        System.out.println("do twoThing");
     }
 }

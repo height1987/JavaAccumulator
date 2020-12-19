@@ -21,6 +21,10 @@ public class DistributLock {
         doTwoThing();
         lock.unlock();
         lock.unlock();
+
+
+
+
     }
 
     private static void doTwoThing() {

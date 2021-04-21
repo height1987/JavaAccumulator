@@ -92,12 +92,9 @@
 
 - GC Log分析
 
-    1) YGC
-
+    1)YGC
 ![image-20210421110510471](https://outter.oss-cn-shanghai.aliyuncs.com/ygc_log1.png)
- 
-     2) Full GC
-
+    2)FGC
 ![image-20210421111006106](https://outter.oss-cn-shanghai.aliyuncs.com/fgc_log.png)
 
 

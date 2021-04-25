@@ -1,0 +1,35 @@
+### CMS
+
+#### 概述
+
+![image-20210423224740531](/Users/height/Library/Application Support/typora-user-images/image-20210423224740531.png)
+
+- 步骤
+
+  - 初始标记：仅仅关联GC Roots直接关联的对象。**Stop World** **耗时短**
+  - 并发标记：Concurrent-Mark，从根遍历整个对象图。**不需要StopWorld** **耗时长**
+  - 重新标记：Remark,修正在并发标记中出现的变动对象的标记。**Stop World** **耗时短**
+  - 并发清除：Concurrent-Sweep。清理删除判断已死亡的对象，释放内存空间。**不需要StopWorld** **耗时长**
+
+  
+
+- 优缺点
+  - 优：并发收集，低延迟。耗时的操作都是并发执行，STW的时间比较短，就2次。
+  - 缺:标记清除算法 就会有内存碎片。
+  - 缺：在执行过程中，没有STW，所以用户线程执行的过程中，需要有足够的内存处理代码。失败则报 Concurrent Mode Failure
+  - 缺：CMS对CPU资源比较敏感。一直会占用内存，吞吐量会下降。
+  - 缺：无法处理浮动垃圾。在并发标记阶段和重新标记阶段，没办法处理产生的浮动垃圾，只能在下次GC中被回收。
+
+- 参数
+
+  - -XX:+UseConcMarkSweepGC，手动指定使用CMS。
+
+  - -XX:CMSInitiatingOccupanyFraction设置内存使用率的阈值，JDK6之后默认92%。
+
+    - 如果内存增长比较缓慢，则可以稍微大一点，如果涨的快，则需要小一点。
+
+  - -XX:ParallelCMSThreads设置CMS的线程数量。
+
+    - CMS默认数量 (ParallelCMSThreads+3)/4
+
+      

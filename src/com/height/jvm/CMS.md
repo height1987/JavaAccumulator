@@ -33,9 +33,25 @@
 
     - CMS默认数量 (ParallelCMSThreads+3)/4
 
-  - -XX:CMSFullGCsBeforeCompaction=n 可以设置在多少次之后
+  - -XX:CMSFullGCsBeforeCompaction=n 可以设置在多少次cms后进行内存整理压缩
+  
+  - -XX+UseCMSCompactAtFullCollection：在CMS后进行内存整理 ，一般不开启
+  
+  - -XX:+UseCMSInitiatingOccupancyOnly:使用手动定义初始化定义开始CMS收集.（禁止hotspot自己触发）
+  
+  - -XX:+CMSParallelRemarkEnabled ： 开启并发标记
+  
+  - 
   
     
 
 - 参考：https://blog.csdn.net/zqz_zqz/article/details/70568819
 - CMS的详细说明：https://plumbr.io/handbook/garbage-collection-algorithms-implementations#concurrent-mark-and-sweep
+- 很不错的优化：https://blog.csdn.net/shudaqi2010/article/details/102567067
+- gcLog分析：https://www.cnblogs.com/zhangxiaoguang/p/5792468.html
+- metaspace的问题：https://www.jianshu.com/p/b448c21d2e71
+
+
+
+
+

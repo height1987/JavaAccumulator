@@ -24,3 +24,4 @@
 
 - 资料
   - ZGC处理：https://blog.csdn.net/xiaolyuh123/article/details/103937164
+  - oracle官方文档：https://docs.oracle.com/en/java/javase/16/gctuning/

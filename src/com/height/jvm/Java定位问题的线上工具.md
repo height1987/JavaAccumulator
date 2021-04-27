@@ -22,6 +22,8 @@
 
 #### JMap
 
+- jmap -dump:format=b,file=20170307.dump 16048   dump线上的内存数据
+
 
 
 #### JPS
@@ -43,3 +45,6 @@
 
 
 
+- GC日志查看工具
+  - GCView GCEasy GCHisto GCLogViewer hpjmeter garbagecat
+  - gc easy :https://gceasy.io/

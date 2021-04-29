@@ -15,6 +15,7 @@
     
 
 - 指针染色技术
+  
   - 
 - 
 
@@ -25,3 +26,4 @@
 - 资料
   - ZGC处理：https://blog.csdn.net/xiaolyuh123/article/details/103937164
   - oracle官方文档：https://docs.oracle.com/en/java/javase/16/gctuning/
+  - 简介推荐：https://www.zhihu.com/question/287945354/answer/458761494

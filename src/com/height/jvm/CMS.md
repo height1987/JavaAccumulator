@@ -24,26 +24,64 @@
 - 参数
 
   - -XX:+UseConcMarkSweepGC，手动指定使用CMS。
-
-  - -XX:CMSInitiatingOccupanyFraction设置内存使用率的阈值，JDK6之后默认92%。
-
-    - 如果内存增长比较缓慢，则可以稍微大一点，如果涨的快，则需要小一点。
-
+- -XX:CMSInitiatingOccupanyFraction设置内存使用率的阈值，JDK6之后默认92%。
+  
+  - 如果内存增长比较缓慢，则可以稍微大一点，如果涨的快，则需要小一点。
   - -XX:ParallelCMSThreads设置CMS的线程数量。
-
-    - CMS默认数量 (ParallelCMSThreads+3)/4
-
+- CMS默认数量 (ParallelCMSThreads+3)/4
   - -XX:CMSFullGCsBeforeCompaction=n 可以设置在多少次cms后进行内存整理压缩
-  
-  - -XX+UseCMSCompactAtFullCollection：在CMS后进行内存整理 ，一般不开启
-  
+- -XX+UseCMSCompactAtFullCollection：在CMS后进行内存整理 ，一般不开启
   - -XX:+UseCMSInitiatingOccupancyOnly:使用手动定义初始化定义开始CMS收集.（禁止hotspot自己触发）
+- -XX:+CMSParallelRemarkEnabled ： 开启并发标记
+
+
+
+
+
+gclog解读
+
+```
+//第一步 初始标记 这一步会停顿
+2021-04-26T21:01:46.924+0800: 11.678: [GC (CMS Initial Mark) [1 CMS-initial-mark: 35588K(353920K)] 46791K(507264K), 0.0074042 secs] [Times: user=0.01 sys=0.00, real=0.01 secs] 
+
+//第二步 并发标记
+2021-04-26T21:01:46.932+0800: 11.685: [CMS-concurrent-mark-start]
+2021-04-26T21:01:46.989+0800: 11.742: [CMS-concurrent-mark: 0.037/0.057 secs] [Times: user=0.10 sys=0.01, real=0.05 secs] 
+
+//第三步 预清理
+2021-04-26T21:01:46.989+0800: 11.742: [CMS-concurrent-preclean-start]
+2021-04-26T21:01:46.994+0800: 11.748: [CMS-concurrent-preclean: 0.005/0.005 secs] [Times: user=0.01 sys=0.00, real=0.01 secs] 
+
+//第四步 可被终止的预清理
+2021-04-26T21:01:46.994+0800: 11.748: [CMS-concurrent-abortable-preclean-start]
+2021-04-26T21:01:47.875+0800: 12.628: [CMS-concurrent-abortable-preclean: 0.613/0.880 secs] [Times: user=1.61 sys=0.02, real=0.88 secs] 
+
+//第五步 重新标记
+2021-04-26T21:01:47.879+0800: 12.632: [GC (CMS Final Remark) [YG occupancy: 97724 K (153344 K)]2021-04-26T21:01:47.879+0800: 12.632: [Rescan (parallel) , 0.0454485 secs]2021-04-26T21:01:47.924+0800: 12.678: [weak refs processing, 0.0033182 secs]2021-04-26T21:01:47.928+0800: 12.681: [class unloading, 0.0073723 secs]2021-04-26T21:01:47.935+0800: 12.688: [scrub symbol table, 0.0048092 secs]2021-04-26T21:01:47.940+0800: 12.693: [scrub string table, 0.0021463 secs][1 CMS-remark: 35588K(353920K)] 133312K(507264K), 0.0638955 secs] [Times: user=0.08 sys=0.00, real=0.07 secs] 
+
+//第六步 清理
+2021-04-26T21:01:47.943+0800: 12.696: [CMS-concurrent-sweep-start]
+2021-04-26T21:01:48.012+0800: 12.765: [CMS-concurrent-sweep: 0.069/0.069 secs] [Times: user=0.13 sys=0.01, real=0.07 secs] 
+
+//第七步 重置
+2021-04-26T21:01:48.012+0800: 12.765: [CMS-concurrent-reset-start]
+2021-04-26T21:01:48.029+0800: 12.782: [CMS-concurrent-reset: 0.017/0.017 secs] [Times: user=0.02 sys=0.01, real=0.01 secs] 
+```
+
+
+
+
+
+- 碎片化可能会导致的问题
+
+  - ​     -XX:+UseCMSCompactAtFullCollection             -XX:CMSFullGCsBeforeCompaction=0            
+  - 两个参数是针对cms垃圾回收器碎片做优化的，CMS是不会移动内存的， 运行时间长了，会产生很多内存碎片， 导致没有一段连续区域可以存放大对象，出现”**promotion failed**”、”**concurrent mode failure**”, 导致fullgc，启用UseCMSCompactAtFullCollection 在FULL GC的时候， 对年老代的内存进行压缩。-XX:CMSFullGCsBeforeCompaction=0 则是代表多少次FGC后对老年代做压缩操作，默认值为0，代表每次都压缩, 把对象移动到内存的最左边，可能会影响性能,但是可以消除碎片；
+    106.641: [GC 106.641: [ParNew (promotion failed): 14784K->14784K(14784K), 0.0370328 secs]106.678: [CMS106.715: [CMS-concurrent-mark: 0.065/0.103 secs] [Times: user=0.17 sys=0.00, real=0.11 secs]
+    (concurrent mode failure): 41568K->27787K(49152K), 0.2128504 secs] 52402K->27787K(63936K), [CMS Perm : 2086K->2086K(12288K)], 0.2499776 secs] [Times: user=0.28 sys=0.00, real=0.25 secs]
+
+
   
-  - -XX:+CMSParallelRemarkEnabled ： 开启并发标记
   
-  - 
-  
-    
 
 - 参考：https://blog.csdn.net/zqz_zqz/article/details/70568819
 - CMS的详细说明：https://plumbr.io/handbook/garbage-collection-algorithms-implementations#concurrent-mark-and-sweep

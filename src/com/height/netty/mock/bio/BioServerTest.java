@@ -9,17 +9,12 @@ import java.util.concurrent.*;
 
 public class BioServerTest {
     public static void main(String[] args) throws Exception {
-
         ServerSocket serverSocket = new ServerSocket();
-        serverSocket.bind(new InetSocketAddress("127.0.0.1", 6666));
-
-        ExecutorService acceptorPool = Executors.newCachedThreadPool();
-        ExecutorService workerPool = Executors.newCachedThreadPool();
-
+        serverSocket.bind(new InetSocketAddress("12",6666));
 
         Socket accept = serverSocket.accept();
-        System.out.println("accept one!");
-        workerPool.submit(new Runnable() {
+        ExecutorService executorService = Executors.newCachedThreadPool();
+        executorService.submit(new Runnable() {
             @Override
             public void run() {
                 handle(accept);
@@ -31,26 +26,20 @@ public class BioServerTest {
     private static void handle(Socket accept) {
 
         InputStream inputStream = null;
+        byte[] bytes = new byte[1024];
+
         try {
-            inputStream = accept.getInputStream();
-            byte[] bytes = new byte[1024];
-
-            while (true) {
-                int read = inputStream.read(bytes);
-                if (read != -1) {
-                    System.out.println("read comes" +new String(bytes));
-                }
+            inputStream= accept.getInputStream();
+            int read = inputStream.read(bytes);
+            if(read != -1){
+                System.out.println(new String(bytes));
             }
-
         } catch (IOException e) {
             e.printStackTrace();
-        }finally {
-            try {
-                accept.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
         }
+
+
     }
+
 
 }

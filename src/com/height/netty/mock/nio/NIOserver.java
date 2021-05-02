@@ -20,10 +20,12 @@ public class NIOserver {
             try {
                 // 对应IO编程中服务端启动
                 ServerSocketChannel listenerChannel = ServerSocketChannel.open();
+                ServerSocketChannel listenerChannel1 = ServerSocketChannel.open();
+                listenerChannel1.socket().bind(new InetSocketAddress("127.0.0.1",8000));
                 listenerChannel.socket().bind(new InetSocketAddress("127.0.0.1",8000));
                 listenerChannel.configureBlocking(false);
                 listenerChannel.register(serverSelector, SelectionKey.OP_ACCEPT);
-
+                listenerChannel1.register(serverSelector, SelectionKey.OP_ACCEPT);
                 while (true) {
                     // 监测是否有新的连接，这里的1指的是阻塞的时间为 1ms
                     if (serverSelector.select(1) > 0) {

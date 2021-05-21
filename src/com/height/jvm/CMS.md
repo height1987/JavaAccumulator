@@ -79,15 +79,28 @@ gclog解读
     106.641: [GC 106.641: [ParNew (promotion failed): 14784K->14784K(14784K), 0.0370328 secs]106.678: [CMS106.715: [CMS-concurrent-mark: 0.065/0.103 secs] [Times: user=0.17 sys=0.00, real=0.11 secs]
     (concurrent mode failure): 41568K->27787K(49152K), 0.2128504 secs] 52402K->27787K(63936K), [CMS Perm : 2086K->2086K(12288K)], 0.2499776 secs] [Times: user=0.28 sys=0.00, real=0.25 secs]
 
+- promotion failed：较高等级的内存区域，然而有时候会出现一些意外，导致对象晋升失败
+  - MinorGC时，Eden区的对象晋升至Suvivor区，发现空间不足，直接晋升至Old区，但是Old区也放不下，导致对象的晋升失败，进而触发FGC。这个也会导致concurrent mode failed的报错。
+- concurrent mode failed
+  - 在CMS发生过程中，用户新创建的对象使old区直接满了。清理速度小于垃圾的新增速度。
+  - 解决方法：
+    - 降低cms触发百分比
+    - 增加老年代大小
+    - xx次cms后进行fullgc 清理垃圾
 
-  
-  
+- **空间分配担保**
+  -  在发生**Minor GC**之前，虚拟机会检查**老年代最大可用的连续空间**是否**大于新生代所有对象的总空间**
+    - 如果大于，则此次**Minor GC是安全的**
+    - 如果小于，则虚拟机会查看**HandlePromotionFailure**设置值是否允许担保失败。如果HandlePromotionFailure=true，那么会继续检查老年代最大可用连续空间是否大于**历次晋升到老年代的对象的平均大小**，如果大于，则尝试进行一次Minor GC，但这次Minor GC依然是有风险的；如果小于或者HandlePromotionFailure=false，则改为进行一次Full GC。
+
+
 
 - 参考：https://blog.csdn.net/zqz_zqz/article/details/70568819
 - CMS的详细说明：https://plumbr.io/handbook/garbage-collection-algorithms-implementations#concurrent-mark-and-sweep
 - 很不错的优化：https://blog.csdn.net/shudaqi2010/article/details/102567067
 - gcLog分析：https://www.cnblogs.com/zhangxiaoguang/p/5792468.html
 - metaspace的问题：https://www.jianshu.com/p/b448c21d2e71
+- 几个大的问题  https://www.jianshu.com/p/573b5c6b8e89
 
 
 
